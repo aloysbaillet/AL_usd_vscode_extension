@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "animallogic-usd" extension will be documented in this file.
 
+## [0.2.0]
+- Improved support for Windows paths ([#2](https://github.com/AnimalLogic/AL_usd_vscode_extension/pull/2))
+- Log errors in user-visible ways.
+
 ## [0.1.0]
 - Asset paths are now clickable links with asset resolution using `usdresolve`.
 - Go To Definition works for prim paths within the same document.
