@@ -24,6 +24,7 @@ async function isUsdcFile(path) {
     return isUsdc;
   }
   catch (err) {
+    vscode.window.showErrorMessage("Failed to check if file is USDC");
   }
   // Fallback to file extension.
   return path.endsWith(".usdc");
@@ -31,6 +32,10 @@ async function isUsdcFile(path) {
 
 async function resolveAsset(inputPath, anchorPath) {
   const template = vscode.workspace.getConfiguration().get('usd.resolve');
+  if (template == "") {
+    console.log("usdresolve needs to be configured for links to function properly");
+    return null;
+  }
   const command = template.replace("{inputPath}", inputPath).replace("{anchorPath}", anchorPath);
   try {
     const { stdout, stderr } = await exec(command);
@@ -38,12 +43,13 @@ async function resolveAsset(inputPath, anchorPath) {
     if (result.length > 0) {
       var uri = vscode.Uri.file(result);
       if (await isUsdcFile(result)) {
-        uri.scheme = "usdc" ;
+        uri.scheme = "usdc";
       }
       return uri
     }
   }
-  catch(err) {
+  catch (err) {
+    vscode.window.showErrorMessage("Failed to run usdresolve: " + err);
     return null;
   }
   return null;
@@ -69,7 +75,7 @@ function getAssets(document, lineNum) {
   for (var i = line.firstNonWhitespaceCharacterIndex; i < line.text.length; i++) {
     if (line.text[i] == '@') {
       if (assetType == 0) {
-        if(i + 2 < line.text.length && line.text[i + 1] == '@' && line.text[i + 2] == '@') {
+        if (i + 2 < line.text.length && line.text[i + 1] == '@' && line.text[i + 2] == '@') {
           assetType = 3;
         }
         else {
@@ -147,7 +153,7 @@ function getPaths(document, lineNum) {
 class HoverProvider {
   async provideHover(document, position, token) {
     const assets = getAssets(document, position.line);
-    for(var i = 0; i < assets.length; i++) {
+    for (var i = 0; i < assets.length; i++) {
       const asset = assets[i];
       if (asset.range.start.isBeforeOrEqual(position) && asset.range.end.isAfterOrEqual(position)) {
         const resolved = await resolveAsset(asset.text, document.fileName);
@@ -158,7 +164,7 @@ class HoverProvider {
       }
     }
     const paths = getPaths(document, position.line);
-    for(var i = 0; i < paths.length; i++) {
+    for (var i = 0; i < paths.length; i++) {
       const path = paths[i];
       if (path.range.start.isBeforeOrEqual(position) && path.range.end.isAfterOrEqual(position)) {
         return new vscode.Hover([path.text], path.range);
@@ -171,7 +177,7 @@ class HoverProvider {
 class DefinitionProvider {
   provideDefinition(document, position, token) {
     const paths = getPaths(document, position.line);
-    for(var i = 0; i < paths.length; i++) {
+    for (var i = 0; i < paths.length; i++) {
       const path = paths[i];
       if (path.range.start.isBeforeOrEqual(position) && path.range.end.isAfterOrEqual(position)) {
         const definition = findDefinition(document, path.text, token);
