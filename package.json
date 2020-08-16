@@ -2,7 +2,7 @@
     "name": "vscode-usda-syntax",
     "displayName": "USD Language",
     "description": "Pixar USD Language Extension by Animal Logic",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "author": {
         "name": "Aloys Baillet",
         "email": "aloys.baillet@al.com.au",
